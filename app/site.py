@@ -71,19 +71,6 @@ with st.container():
             key="data_editor",
         )
 
-        st.divider()
-
-        altair_chart = (
-            alt.Chart(pandas_dataframe)
-            .mark_line()
-            .encode(
-                x=alt.X("day_of_the_week", sort=None).title("День недели"),
-                y=alt.Y("fruits_num").title("Число фруктов"),
-                color=alt.Color("name").title("Название дерева"),
-            )
-        )
-        st.altair_chart(altair_chart, use_container_width=True)
-
         # Запись в БД изменений таблицы
         try:
             if edited_rows := st.session_state["data_editor"]["edited_rows"]:
@@ -110,3 +97,16 @@ with st.container():
 
         except ServiceError as err:
             st.error(err.message)
+
+        st.divider()
+
+        altair_chart = (
+            alt.Chart(pandas_dataframe)
+            .mark_line()
+            .encode(
+                x=alt.X("day_of_the_week", sort=None).title("День недели"),
+                y=alt.Y("fruits_num").title("Число фруктов"),
+                color=alt.Color("name").title("Название дерева"),
+            )
+        )
+        st.altair_chart(altair_chart, use_container_width=True)
