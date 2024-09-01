@@ -50,9 +50,7 @@ class DatabaseRepository:
     def get_all(self, *args, **kwargs):
         with Session(self.engine) as session:
             order_by = kwargs.get("order_by")
-            models = session.scalars(
-                select(self.db_table).order_by(text(order_by if order_by else "id"))
-            ).all()
+            models = session.scalars(select(self.db_table).order_by(text(order_by if order_by else "id"))).all()
         return models
 
 
@@ -67,9 +65,7 @@ class ServiceError(Exception):
 class CreateRecordService:
     """Сервис по созданию записей."""
 
-    def __init__(
-        self, validation_service: ValidationService, repository: DatabaseRepository
-    ):
+    def __init__(self, validation_service: ValidationService, repository: DatabaseRepository):
         self.validation_service = validation_service
         self.repository = repository
 
@@ -81,17 +77,13 @@ class CreateRecordService:
         try:
             self.repository.create(**validated_data.model_dump())
         except IntegrityError as err:
-            raise ServiceError(
-                message="Запись на данный день недели с этим деревом уже существует"
-            ) from err
+            raise ServiceError(message="Запись на данный день недели с этим деревом уже существует") from err
 
 
 class UpdateRecordService:
     """Сервис по обновлению записей."""
 
-    def __init__(
-        self, validation_service: ValidationService, repository: DatabaseRepository
-    ):
+    def __init__(self, validation_service: ValidationService, repository: DatabaseRepository):
         self.validation_service = validation_service
         self.repository = repository
 
@@ -102,14 +94,10 @@ class UpdateRecordService:
             raise ServiceError(message="Ошибка в вводимых данных") from err
         try:
             # Убираем ключи, которые ссылаются на None
-            update_kwargs = {
-                x: y for x, y in validated_data.model_dump().items() if y is not None
-            }
+            update_kwargs = {x: y for x, y in validated_data.model_dump().items() if y is not None}
             self.repository.update(filter_by_args=filter_by_args, **update_kwargs)
         except IntegrityError as err:
-            raise ServiceError(
-                message="Запись на данный день недели с этим деревом уже существует"
-            ) from err
+            raise ServiceError(message="Запись на данный день недели с этим деревом уже существует") from err
 
 
 class DeleteRecordService:
@@ -128,9 +116,7 @@ class DeleteRecordService:
 class GetAllRecordsService:
     """Сервис по получению всех записей."""
 
-    def __init__(
-        self, repository: DatabaseRepository, validation_service: ValidationService
-    ):
+    def __init__(self, repository: DatabaseRepository, validation_service: ValidationService):
         self.repository = repository
         self.validation_service = validation_service
 
@@ -142,18 +128,10 @@ class GetAllRecordsService:
         return result
 
 
-garden_tree_validation_service_in = ValidationService(
-    pydantic_class=GardenTreeStatisticDaySchemaIn
-)
-garden_tree_validation_service_out = ValidationService(
-    pydantic_class=GardenTreeStatisticDaySchemaOut
-)
-garden_tree_validation_service_update = ValidationService(
-    pydantic_class=GardenTreeStatisticDayUpdateSchema
-)
-garden_tree_repository = DatabaseRepository(
-    engine=sync_engine, db_table=GardenTreeStaticDayModel
-)
+garden_tree_validation_service_in = ValidationService(pydantic_class=GardenTreeStatisticDaySchemaIn)
+garden_tree_validation_service_out = ValidationService(pydantic_class=GardenTreeStatisticDaySchemaOut)
+garden_tree_validation_service_update = ValidationService(pydantic_class=GardenTreeStatisticDayUpdateSchema)
+garden_tree_repository = DatabaseRepository(engine=sync_engine, db_table=GardenTreeStaticDayModel)
 
 create_garden_tree_record = CreateRecordService(
     validation_service=garden_tree_validation_service_in,

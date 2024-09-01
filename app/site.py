@@ -23,9 +23,7 @@ with st.container():
 
     if button:
         try:
-            create_garden_tree_record(
-                day_of_the_week=day_of_the_week, name=name, fruits_num=fruits_num
-            )
+            create_garden_tree_record(day_of_the_week=day_of_the_week, name=name, fruits_num=fruits_num)
             st.success("Запись сохранена")
         except ServiceError as err:
             st.error(err.message)
@@ -41,9 +39,7 @@ with st.container():
         # Фильтрация по таблице
         query = st.text_input("Фильтр")
         if query:
-            pandas_dataframe = pandas_dataframe[
-                pandas_dataframe.name.str.contains(query)
-            ]
+            pandas_dataframe = pandas_dataframe[pandas_dataframe.name.str.contains(query)]
 
         data_editor = st.data_editor(
             pandas_dataframe,
@@ -81,9 +77,7 @@ with st.container():
                 edited_rows = st.session_state["data_editor"]["edited_rows"]
                 for index, update_kwargs in edited_rows.items():
                     record_id = pandas_dataframe.iloc[index]["id"]
-                    update_garden_tree_record(
-                        filter_by_args={"id": record_id}, **update_kwargs
-                    )
+                    update_garden_tree_record(filter_by_args={"id": record_id}, **update_kwargs)
 
                 added_rows = st.session_state["data_editor"]["added_rows"]
                 for create_kwargs in added_rows:
