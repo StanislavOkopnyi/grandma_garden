@@ -8,11 +8,13 @@ class Base(DeclarativeBase):
 
     def to_dict(self):
         """Функция для представления атрибутов модели в виде словаря."""
+
         return {c.key: getattr(self, c.key)
                 for c in inspect(self).mapper.column_attrs}
 
 class GardenTreeStaticDayModel(Base):
     """Модель для хранения записей о числе фруктов у дерева в определенный день недели."""
+
     __tablename__ = "garden_tree_record"
 
     id: Mapped[int] = mapped_column(primary_key=True)

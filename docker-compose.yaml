@@ -11,3 +11,16 @@ services:
     ports:
       - "5432:${DB_PORT}"
     restart: unless-stopped
+
+  streamlit:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    env_file:
+      ".env"
+    volumes:
+      - ./app:/app
+    ports:
+      - "8501:8501"
+    depends_on:
+      - postgres

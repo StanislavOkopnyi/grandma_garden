@@ -4,6 +4,7 @@ import pandas as pd
 from service import create_garden_tree_record, get_all_garden_records, update_garden_tree_record, delete_garden_tree_record, ServiceError
 from constants import DAYS_OF_THE_WEEK
 
+st.set_page_config(layout="wide")
 
 st.title("Аналитическая сводка сада Агафьи Алексеевны.")
 
@@ -78,6 +79,7 @@ with st.container():
                 for index, update_kwargs in edited_rows.items():
                     record_id = pandas_dataframe.iloc[index]["id"]
                     update_garden_tree_record(filter_by_args={"id": record_id}, **update_kwargs)
+                st.rerun()
 
             if(added_rows:= st.session_state["data_editor"]["added_rows"]):
                 for create_kwargs in added_rows:
@@ -85,10 +87,15 @@ with st.container():
                     if not create_kwargs or len(create_kwargs) < 3:
                         continue
                     create_garden_tree_record(**create_kwargs)
+                    st.rerun()
 
             if(deleted_rows:= st.session_state["data_editor"]["deleted_rows"]):
                 for index in deleted_rows:
                     record_id = pandas_dataframe.iloc[index]["id"]
                     delete_garden_tree_record(filter_by_args={"id": record_id})
+                st.rerun()
+
+
+
         except ServiceError as err:
             st.error(err.message)

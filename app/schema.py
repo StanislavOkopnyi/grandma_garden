@@ -5,6 +5,7 @@ from constants import DAYS_MAP, REVERSE_DAYS_MAP, DAYS_OF_THE_WEEK, DAYS_OF_THE_
 
 class GardenTreeStatisticDaySchemaIn(BaseModel):
     """Модель для валидации входящих данных о количестве фруктов у дерева."""
+
     day_of_the_week: Literal[DAYS_OF_THE_WEEK]
     name: str = Field(..., min_length=1)
     fruits_num: int
@@ -16,6 +17,7 @@ class GardenTreeStatisticDaySchemaIn(BaseModel):
 
 class GardenTreeStatisticDayUpdateSchema(BaseModel):
     """Модель для валидации данных о количестве фруктов у дерева при обновлении записей."""
+
     day_of_the_week: Literal[DAYS_OF_THE_WEEK_DB_VALUES] | None = None
     name: str | None = None
     fruits_num: int | None = None
@@ -23,6 +25,7 @@ class GardenTreeStatisticDayUpdateSchema(BaseModel):
 
 class GardenTreeStatisticDaySchemaOut(BaseModel):
     """Модель для валидации исходящих данных о количестве фруктов у дерева."""
+
     id: int
     day_of_the_week: Literal[DAYS_OF_THE_WEEK_DB_VALUES]
     name: str = Field(..., min_length=1)
