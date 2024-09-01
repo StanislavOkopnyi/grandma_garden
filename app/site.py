@@ -47,7 +47,7 @@ with st.container():
             pandas_dataframe,
             column_config={
                 "id": st.column_config.NumberColumn(
-                    "ID",
+                    "ID (назначается автоматически)",
                     disabled=True,
                     width="small",
                 ),
@@ -73,26 +73,28 @@ with st.container():
 
         # Запись в БД изменений таблицы
         try:
-            if edited_rows := st.session_state["data_editor"]["edited_rows"]:
+            commit_button = st.button("Сохранить изменения")
+
+            if commit_button:
+                edited_rows = st.session_state["data_editor"]["edited_rows"]
                 for index, update_kwargs in edited_rows.items():
                     record_id = pandas_dataframe.iloc[index]["id"]
                     update_garden_tree_record(
                         filter_by_args={"id": record_id}, **update_kwargs
                     )
-                st.rerun()
 
-            if added_rows := st.session_state["data_editor"]["added_rows"]:
+                added_rows = st.session_state["data_editor"]["added_rows"]
                 for create_kwargs in added_rows:
                     # Чтобы не возникала ошибка при неполном вводе данных
                     if not create_kwargs or len(create_kwargs) < 3:
                         continue
                     create_garden_tree_record(**create_kwargs)
-                    st.rerun()
 
-            if deleted_rows := st.session_state["data_editor"]["deleted_rows"]:
+                deleted_rows = st.session_state["data_editor"]["deleted_rows"]
                 for index in deleted_rows:
                     record_id = pandas_dataframe.iloc[index]["id"]
                     delete_garden_tree_record(filter_by_args={"id": record_id})
+
                 st.rerun()
 
         except ServiceError as err:

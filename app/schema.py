@@ -23,9 +23,13 @@ class GardenTreeStatisticDaySchemaIn(BaseModel):
 class GardenTreeStatisticDayUpdateSchema(BaseModel):
     """Модель для валидации данных о количестве фруктов у дерева при обновлении записей."""
 
-    day_of_the_week: Literal[DAYS_OF_THE_WEEK_DB_VALUES] | None = None
+    day_of_the_week: Literal[DAYS_OF_THE_WEEK] | None = None
     name: str | None = None
     fruits_num: int | None = None
+
+    @field_serializer("day_of_the_week")
+    def serialize_day_of_the_week(self, name: str, _info):
+        return DAYS_MAP[name] if name else None
 
 
 class GardenTreeStatisticDaySchemaOut(BaseModel):
