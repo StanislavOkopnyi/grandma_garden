@@ -5,6 +5,10 @@
 
 Сервис запускается локально по адресу http://localhost:8501
 
-![image](https://github.com/user-attachments/assets/b53af58d-5341-4d4d-b9d8-8873b561b45d)
-![image](https://github.com/user-attachments/assets/25784f74-5843-4c94-abf6-a5622f8a4d57)
+В качестве базы данных используется PostgreSQL
+
+![image](https://github.com/user-attachments/assets/c324fdd9-d51f-495c-9200-c102c13516fd)
+![image](https://github.com/user-attachments/assets/d1a02bc6-28a5-4a22-8942-a6fbf2602243)
+
+
 
