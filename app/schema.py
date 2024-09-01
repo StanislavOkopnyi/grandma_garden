@@ -1,6 +1,11 @@
 from typing import Literal
 from pydantic import BaseModel, field_serializer, Field
-from constants import DAYS_MAP, REVERSE_DAYS_MAP, DAYS_OF_THE_WEEK, DAYS_OF_THE_WEEK_DB_VALUES
+from constants import (
+    DAYS_MAP,
+    REVERSE_DAYS_MAP,
+    DAYS_OF_THE_WEEK,
+    DAYS_OF_THE_WEEK_DB_VALUES,
+)
 
 
 class GardenTreeStatisticDaySchemaIn(BaseModel):
