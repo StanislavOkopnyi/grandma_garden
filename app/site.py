@@ -36,13 +36,15 @@ with st.container():
 
     st.divider()
 
-    # Фильтрация по таблице
-    query = st.text_input("Фильтр")
-    if query:
-        mask = pandas_dataframe.applymap(lambda x: query in str(x)).any(axis=1)
-        pandas_dataframe = pandas_dataframe[mask]
-
     if data_frame_list:
+
+        # Фильтрация по таблице
+        query = st.text_input("Фильтр")
+        if query:
+            pandas_dataframe = pandas_dataframe[
+                pandas_dataframe.name.str.contains(query)
+            ]
+
         data_editor = st.data_editor(
             pandas_dataframe,
             column_config={
