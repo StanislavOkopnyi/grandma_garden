@@ -39,7 +39,9 @@ with st.container():
         # Фильтрация по таблице
         query = st.text_input("Фильтр")
         if query:
-            pandas_dataframe = pandas_dataframe[pandas_dataframe.name.str.contains(query)]
+            pandas_dataframe = pandas_dataframe[
+                pandas_dataframe.name.str.contains(query) | pandas_dataframe.day_of_the_week.str.contains(query)
+            ]
 
         data_editor = st.data_editor(
             pandas_dataframe,
