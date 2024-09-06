@@ -8,8 +8,6 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASS}
       POSTGRES_DB: ${DB_NAME}
-    ports:
-      - "5432:${DB_PORT}"
     restart: unless-stopped
 
   streamlit:
@@ -24,3 +22,4 @@ services:
       - "8501:8501"
     depends_on:
       - postgres
+    restart: unless-stopped

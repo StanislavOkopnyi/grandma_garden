@@ -1,15 +1,16 @@
-from sqlalchemy.orm import Session
-from schema import (
-    GardenTreeStatisticDaySchemaIn,
-    GardenTreeStatisticDaySchemaOut,
-    GardenTreeStatisticDayUpdateSchema,
-)
-from models import GardenTreeStaticDayModel, Base
+from datetime import datetime
+from typing import Any
+
+import requests
+from constants import DAYS_OF_THE_WEEK_ISO_MAP
+from database import sync_engine
+from models import Base, GardenTreeStaticDayModel
 from pydantic import BaseModel, ValidationError
+from schema import GardenTreeStatisticDaySchemaIn, GardenTreeStatisticDaySchemaOut, GardenTreeStatisticDayUpdateSchema
 from sqlalchemy import Engine, select
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
 from sqlalchemy.sql import text
-from database import sync_engine
 
 
 class ValidationService:
@@ -71,7 +72,7 @@ class CreateRecordService:
 
     def __call__(self, *args, **kwargs):
         try:
-            validated_data = self.validation_service(**kwargs)
+            validated_data = self.validation_service(**kwargs, strict=True)
         except ValidationError as err:
             raise ServiceError(message="Ошибка в вводимых данных") from err
         try:
@@ -89,12 +90,10 @@ class UpdateRecordService:
 
     def __call__(self, filter_by_args: dict | None = None, *args, **kwargs):
         try:
-            validated_data = self.validation_service(**kwargs)
+            update_kwargs = self.validation_service(**kwargs).model_dump(exclude_none=True)
         except ValidationError as err:
             raise ServiceError(message="Ошибка в вводимых данных") from err
         try:
-            # Убираем ключи, которые ссылаются на None
-            update_kwargs = {x: y for x, y in validated_data.model_dump().items() if y is not None}
             self.repository.update(filter_by_args=filter_by_args, **update_kwargs)
         except IntegrityError as err:
             raise ServiceError(message="Запись на данный день недели с этим деревом уже существует") from err
@@ -113,18 +112,58 @@ class DeleteRecordService:
             raise ServiceError(message="Ошибка при удалении") from err
 
 
+class RequestsGetWeekWeather:
+    """Сервис по получению погоды за прошлую неделю."""
+
+    API_URL = r"https://api.open-meteo.com/v1/forecast?latitude=55.7522&longitude=37.6156&daily=temperature_2m_max&timezone=Europe%2FMoscow&past_days=7&forecast_days=1"
+
+    def __call__(self, *args: Any, **kwargs: Any) -> dict[str, int]:
+        data = requests.get(self.API_URL).json()
+        return self._get_weather(data=data)
+
+    def _get_weather(self, data: dict) -> dict[str, int]:
+        """Обрабатываем json от API, возвращаем словарь
+        с днем недели в качестве ключа, температурой в качестве значения.
+        """
+        # В рамках тестового не провожу дополнительной валидации
+        days: list[str] = data.get("daily", {}).get("time", [])
+        days_temperature: list[str] = data.get("daily", {}).get("temperature_2m_max", [])
+
+        week_weather = {}
+        for day, day_temperature in zip(days, days_temperature):
+            day_iso_value: int = datetime.fromisoformat(day).isoweekday()
+            weekday_name = DAYS_OF_THE_WEEK_ISO_MAP[day_iso_value]
+            week_weather[weekday_name] = float(day_temperature)
+
+        return week_weather
+
+
 class GetAllRecordsService:
     """Сервис по получению всех записей."""
 
-    def __init__(self, repository: DatabaseRepository, validation_service: ValidationService):
+    def __init__(
+        self,
+        repository: DatabaseRepository,
+        validation_service: ValidationService,
+        weather_service: RequestsGetWeekWeather,
+    ):
         self.repository = repository
         self.validation_service = validation_service
+        # Получение словарь с днем недели к температуре
+        # Загружаю один раз при запуске приложения
+        self.weather_dict = weather_service()
 
     def __call__(self, order_by: str | None = None) -> list[dict]:
         result = []
         for model in self.repository.get_all(order_by=order_by):
-            validated_data = self.validation_service(**model.to_dict())
-            result.append(validated_data.model_dump())
+            validated_data: dict = self.validation_service(**model.to_dict(), strict=True).model_dump()
+
+            # Получаем температуру к дню недели
+            day_of_the_week = validated_data["day_of_the_week"]
+            temperature = self.weather_dict[day_of_the_week]
+            validated_data["temperature"] = temperature
+
+            result.append(validated_data)
         return result
 
 
@@ -142,7 +181,10 @@ update_garden_tree_record = UpdateRecordService(
     repository=garden_tree_repository,
 )
 delete_garden_tree_record = DeleteRecordService(repository=garden_tree_repository)
+
+weather_service = RequestsGetWeekWeather()
 get_all_garden_records = GetAllRecordsService(
     repository=garden_tree_repository,
     validation_service=garden_tree_validation_service_out,
+    weather_service=weather_service,
 )

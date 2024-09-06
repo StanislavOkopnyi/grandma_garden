@@ -1,11 +1,7 @@
 from typing import Literal
-from pydantic import BaseModel, field_serializer, Field
-from constants import (
-    DAYS_MAP,
-    REVERSE_DAYS_MAP,
-    DAYS_OF_THE_WEEK,
-    DAYS_OF_THE_WEEK_DB_VALUES,
-)
+
+from constants import DAYS_MAP, DAYS_OF_THE_WEEK, DAYS_OF_THE_WEEK_DB_VALUES, REVERSE_DAYS_MAP
+from pydantic import BaseModel, Field, NonNegativeInt, field_serializer
 
 
 class GardenTreeStatisticDaySchemaIn(BaseModel):
@@ -13,7 +9,7 @@ class GardenTreeStatisticDaySchemaIn(BaseModel):
 
     day_of_the_week: Literal[DAYS_OF_THE_WEEK]
     name: str = Field(..., min_length=1)
-    fruits_num: int
+    fruits_num: NonNegativeInt
 
     @field_serializer("day_of_the_week")
     def serialize_day_of_the_week(self, name: str, _info):
@@ -25,7 +21,7 @@ class GardenTreeStatisticDayUpdateSchema(BaseModel):
 
     day_of_the_week: Literal[DAYS_OF_THE_WEEK] | None = None
     name: str | None = None
-    fruits_num: int | None = None
+    fruits_num: NonNegativeInt | None = None
 
     @field_serializer("day_of_the_week")
     def serialize_day_of_the_week(self, name: str, _info):
@@ -38,7 +34,7 @@ class GardenTreeStatisticDaySchemaOut(BaseModel):
     id: int
     day_of_the_week: Literal[DAYS_OF_THE_WEEK_DB_VALUES]
     name: str = Field(..., min_length=1)
-    fruits_num: int
+    fruits_num: NonNegativeInt
 
     @field_serializer("day_of_the_week")
     def serialize_day_of_the_week(self, name: str, _info):

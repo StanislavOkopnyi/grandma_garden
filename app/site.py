@@ -1,18 +1,16 @@
 import altair as alt
-import streamlit as st
 import pandas as pd
+import streamlit as st
+from constants import DAYS_OF_THE_WEEK
 from service import (
+    ServiceError,
     create_garden_tree_record,
+    delete_garden_tree_record,
     get_all_garden_records,
     update_garden_tree_record,
-    delete_garden_tree_record,
-    ServiceError,
 )
-from constants import DAYS_OF_THE_WEEK
 
-st.set_page_config(layout="wide")
-
-st.title("Аналитическая сводка сада Агафьи Алексеевны.")
+st.title("Аналитическая сводка сада Агафьи Алексеевны")
 
 with st.container():
     st.header(body="Создать новую запись")
@@ -28,6 +26,7 @@ with st.container():
         except ServiceError as err:
             st.error(err.message)
 
+with st.container():
     # Получение данных из БД
     data_frame_list = get_all_garden_records(order_by="day_of_the_week, name")
     pandas_dataframe = pd.DataFrame(data_frame_list)
@@ -63,6 +62,11 @@ with st.container():
                 "fruits_num": st.column_config.NumberColumn(
                     "Число фруктов",
                     width="medium",
+                ),
+                "temperature": st.column_config.NumberColumn(
+                    "Температура °C",
+                    width="medium",
+                    disabled=True,
                 ),
             },
             hide_index=True,
@@ -100,13 +104,31 @@ with st.container():
 
         st.divider()
 
-        altair_chart = (
+        fruits_by_day_line_chart = (
             alt.Chart(pandas_dataframe)
             .mark_line()
             .encode(
                 x=alt.X("day_of_the_week", sort=None).title("День недели"),
-                y=alt.Y("fruits_num").title("Число фруктов"),
+                y=alt.Y("fruits_num").title("Число фруктов (шт.)"),
                 color=alt.Color("name").title("Название дерева"),
             )
         )
-        st.altair_chart(altair_chart, use_container_width=True)
+        temperature_bar_chart = (
+            alt
+            # Убираем дупликаты температуры, чтобы не складывалась температура от разных деревьев
+            # Считаем что температура зависит только от дня недели
+            .Chart(pandas_dataframe.drop_duplicates("day_of_the_week"))
+            .mark_bar(color="#dcdcdc")
+            .encode(
+                x=alt.X("day_of_the_week", sort=None).title("День недели"),
+                y=alt.Y("temperature").title("Температура °C"),
+            )
+        )
+
+        common_chart = (
+            (temperature_bar_chart + fruits_by_day_line_chart)
+            .resolve_scale(y="shared")
+            .properties(width=600, height=600)
+        )
+
+        st.altair_chart(common_chart, use_container_width=True)

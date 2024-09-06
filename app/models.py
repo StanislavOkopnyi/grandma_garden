@@ -1,7 +1,7 @@
+from constants import DaysOfTheWeekEnum
+from database import sync_engine
 from sqlalchemy import String, UniqueConstraint, inspect
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-from database import sync_engine
-from constants import DaysOfTheWeekEnum
 
 
 class Base(DeclarativeBase):

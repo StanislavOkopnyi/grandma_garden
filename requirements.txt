@@ -89,7 +89,9 @@ referencing==0.35.1
     #   jsonschema
     #   jsonschema-specifications
 requests==2.32.3
-    # via streamlit
+    # via
+    #   grandmothers-garden (pyproject.toml)
+    #   streamlit
 rich==13.8.0
     # via streamlit
 rpds-py==0.20.0
