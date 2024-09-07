@@ -1,7 +1,7 @@
 import altair as alt
 import pandas as pd
 import streamlit as st
-from constants import DAYS_OF_THE_WEEK
+from constants import COLUMNS_MAP, DAYS_OF_THE_WEEK
 from service import (
     ServiceError,
     create_garden_tree_record,
@@ -37,10 +37,24 @@ with st.container():
 
         # Фильтрация по таблице
         query = st.text_input("Фильтр")
-        if query:
-            pandas_dataframe = pandas_dataframe[
-                pandas_dataframe.name.str.contains(query) | pandas_dataframe.day_of_the_week.str.contains(query)
-            ]
+        columns_filter = st.multiselect(
+            "Какие столбцы использовать для фильтрации записей?",
+            options=[
+                "День недели",
+                "Название дерева",
+                "Число фруктов",
+                "Температура °C",
+                "ID (назначается автоматически)",
+            ],
+            default=["Название дерева"],
+        )
+        if query and columns_filter:
+            columns_filter = [COLUMNS_MAP[i] for i in columns_filter]
+            pandas_dataframe.query(
+                # Переводим все столбцы в строки для поиска по значению
+                " or ".join([f"{i}.astype('string').str.contains(@query)" for i in columns_filter]),
+                inplace=True,
+            )
 
         data_editor = st.data_editor(
             pandas_dataframe,

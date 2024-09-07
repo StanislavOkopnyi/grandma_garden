@@ -6,7 +6,11 @@ from constants import DAYS_OF_THE_WEEK_ISO_MAP
 from database import sync_engine
 from models import Base, GardenTreeStaticDayModel
 from pydantic import BaseModel, ValidationError
-from schema import GardenTreeStatisticDaySchemaIn, GardenTreeStatisticDaySchemaOut, GardenTreeStatisticDayUpdateSchema
+from schema import (
+    GardenTreeStatisticDaySchemaIn,
+    GardenTreeStatisticDaySchemaOut,
+    GardenTreeStatisticDayUpdateSchema,
+)
 from sqlalchemy import Engine, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session

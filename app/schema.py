@@ -1,6 +1,11 @@
 from typing import Literal
 
-from constants import DAYS_MAP, DAYS_OF_THE_WEEK, DAYS_OF_THE_WEEK_DB_VALUES, REVERSE_DAYS_MAP
+from constants import (
+    DAYS_MAP,
+    DAYS_OF_THE_WEEK,
+    DAYS_OF_THE_WEEK_DB_VALUES,
+    REVERSE_DAYS_MAP,
+)
 from pydantic import BaseModel, Field, NonNegativeInt, field_serializer
 
 
